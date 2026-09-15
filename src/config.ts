@@ -33,6 +33,8 @@ export const COLORS = {
   barGood: 0x6fcf97,
   barBad: 0xc9743a,
   barFrame: 0x5a628f,
+  /** La porzione di barra che l'abito attuale non potrà mai più riempire. */
+  barLost: 0x3a2432,
   outfit: 0x20202e,
   outfitShirt: 0xe8e8f0,
   outfitSpent: 0x2a2a35,

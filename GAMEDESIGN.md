@@ -16,19 +16,43 @@ ragazza che gli piace, e la città fa di tutto per sporcarlo.
 
 Si consuma sporcandosi: pozzanghere, sacchi di spazzatura, piccioni. Quando
 arriva a zero il ragazzo è impresentabile e deve cambiarsi — si consuma un
-**abito di ricambio** (le vite, tre all'inizio) e si riparte puliti. Finiti
-gli abiti, l'appuntamento è compromesso.
+**abito di ricambio** e si riparte dall'ultimo checkpoint. Finiti gli abiti,
+l'appuntamento è compromesso.
+
+### Gli abiti di ricambio sono peggiori (e devono esserlo)
+
+Il guardaroba è, in ordine di disperazione:
+
+| Abito | Tetto |
+| --- | --- |
+| Il completo buono | 100% |
+| Il vestito del matrimonio di tuo cugino | 55% |
+| La felpa che tenevi in macchina | 30% |
+
+Cambiarsi **non riempie la barra: ne abbassa il tetto, per sempre.**
+
+Questo non è un dettaglio di bilanciamento, è la toppa a una falla
+strutturale. Se il cambio riportasse al 100%, il giocatore sarebbe *premiato
+per essersi sporcato*: bastava rovinarsi apposta poco prima del traguardo per
+arrivare immacolati. È il difetto di qualunque meccanismo che rimetta a
+nuovo, gratis, lo stesso valore che poi viene giudicato.
+
+Con i tetti il conto torna: da un completo buono al 60% conviene resistere
+(60 > 55), da uno al 20% conviene cambiarsi (55 > 20). Cioè cambiarsi resta
+la mossa giusta solo quando sei davvero ridotto male — che è una decisione
+interessante, non un exploit. E l'interfaccia lo mostra: la porzione di barra
+perduta resta disegnata, spenta, così il giocatore vede di aver perso
+qualcosa per sempre invece di vedere una barra che si riempie.
 
 Ma soprattutto: **il valore residuo all'arrivo decide il finale.** Non esiste
 un semplice "hai vinto". Esiste un giudizio:
 
-| Presentabilità | Reazione |
-| --- | --- |
-| 95%+ | Impeccabile. Lei sorride. |
-| 75%+ | Un po' spettinato, ma va benissimo. |
-| 50%+ | Lei fa finta di non notare la macchia. |
-| 25%+ | Lei propone di sedersi… fuori. |
-| sotto | Lei ha appena ricordato di avere un impegno. |
+| Presentabilità | In orario | In ritardo |
+| --- | --- | --- |
+| 75%+ | Lei sorride. La serata comincia bene. | Lei apprezza lo sforzo, ma aveva altri programmi. |
+| 40%+ | Lei fa finta di non notare nulla. | Lei propone di sedersi… fuori. |
+| sotto | Lei chiede se stai bene. | Lei ha appena ricordato di avere un impegno. |
+| in felpa | Lei ti guarda la felpa. Poi guarda te. Poi di nuovo la felpa. | Lei era già andata via. |
 
 Questo è ciò che tiene in piedi tutto il resto: arrivare e arrivare *bene*
 sono due obiettivi diversi, e il secondo è quello che fa rigiocare.
@@ -182,7 +206,7 @@ Misurati sul gioco in esecuzione, non calcolati:
 | Colpo di piccione | 14 punti |
 | Scorta di una fontanella | 36 punti |
 | Lunghezza del percorso | 2560 px, quattro schermate |
-| Corsa diretta dall'inizio alla fine | 16,4 s, si arriva al 63% |
+| Corsa diretta dall'inizio alla fine | 16,0 s, si arriva al 18% |
 | Limite prima del ritardo | 28 s |
 
 Chi tira dritto su tutto arriva intorno al 63% e in orario; chi si ferma a
@@ -191,3 +215,23 @@ strategie che rende il livello interessante.
 
 Questi valori sono il vocabolario con cui si scrivono i livelli: se cambiano,
 tutti i livelli già disegnati vanno ricontrollati.
+
+### L'inviluppo di salto
+
+Non basta sapere che il salto alza di 59 px: per piazzare una piattaforma
+serve sapere **dove** si passa a una certa quota. Questa tabella è misurata
+registrando l'arco di un salto pieno a velocità massima, e dice entro quale
+distanza orizzontale dal punto di stacco il ragazzo si trova almeno a quel
+dislivello:
+
+| Dislivello | Finestra utile dal punto di stacco |
+| --- | --- |
+| 0 (pianura) | 0 → 91 px |
+| +25 px | 14 → 82 px |
+| +40 px | 25 → 74 px |
+| +50 px | 34 → 68 px |
+| +55 px | 40 → 62 px |
+
+Una piattaforma a +50 px va quindi piazzata fra 34 e 68 px oltre il bordo di
+stacco. È la regola che mancava: le prime piattaforme alte erano a 105, 110 e
+125 px, cioè **semplicemente irraggiungibili**, e si vedeva solo provando.

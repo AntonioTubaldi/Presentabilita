@@ -41,17 +41,22 @@ const PLATFORMS: readonly PlatformSpec[] = [
   [2110, 350, 440, 20], // x 1890..2330
   [2460, 350, 200, 20], // x 2360..2560
 
-  // Cornicioni e impalcature: la via alta evita le insidie ma costa salti
-  [160, 295, 70, 12],
-  [250, 245, 60, 12],
-  [470, 295, 80, 12],
-  [900, 295, 90, 12],
-  [1150, 295, 70, 12],
-  [1330, 245, 80, 12],
-  [1560, 295, 70, 12],
-  [1750, 245, 90, 12],
-  [2000, 295, 80, 12],
-  [2200, 245, 70, 12],
+  // Cornicioni e impalcature: la via alta salta le insidie ma costa salti.
+  //
+  // Ogni cornicione alto sta dentro la finestra di atterraggio misurata:
+  // con un dislivello di +50 px il centro del ragazzo, staccando dal bordo
+  // del cornicione basso, ricade fra 34 e 68 px più avanti. I varchi qui
+  // sotto sono di 30 px, comodamente dentro quella finestra.
+  [160, 295, 70, 12], // basso   125.. 195
+  [250, 245, 60, 12], // ALTO    220.. 280   (varco 25)
+  [470, 295, 80, 12], // basso   430.. 510
+  [900, 295, 90, 12], // basso   855.. 945
+  [1150, 295, 70, 12], // basso  1115..1185
+  [1250, 245, 70, 12], // ALTO   1215..1285  (varco 30)
+  [1560, 295, 70, 12], // basso  1525..1595
+  [1665, 245, 80, 12], // ALTO   1625..1705  (varco 30)
+  [2000, 295, 80, 12], // basso  1960..2040
+  [2105, 245, 70, 12], // ALTO   2070..2140  (varco 30)
 ];
 
 /**
@@ -70,7 +75,7 @@ const HAZARDS: readonly HazardSpec[] = [
   ['fontanella', 1600, 322, 24, 36],
   ['spazzatura', 1790, 332, 16, 16],
   ['pozzanghera', 1950, 337, 50, 6],
-  ['pozzanghera', 2250, 337, 60, 6],
+  ['pozzanghera', 2190, 337, 60, 6], // spostata: chi scende dalla via alta atterra a ~2257
 ];
 
 const PIGEONS: readonly PigeonSpec[] = [
@@ -329,8 +334,10 @@ export class GameScene extends Phaser.Scene {
         this.hud.flash(message, this.time.now);
         break;
       case 'cambioAbito':
+        // Il messaggio deve dire subito che ci si è rimessi peggio, non meglio:
+        // è l'unico momento in cui il giocatore vede il costo del cambio.
         this.hud.flash(
-          `IMPRESENTABILE! Cambio d'abito — ne restano ${result.abitiRimasti}`,
+          `Hai dovuto metterti ${result.nuovoAbito}. Massimo ${result.tetto}%.`,
           this.time.now,
         );
         this.respawn();
@@ -343,7 +350,12 @@ export class GameScene extends Phaser.Scene {
 
   private finish(): void {
     this.end(
-      `Sei arrivato.\n\n${finalVerdict(this.presentability.percent, this.appointment.lateBySeconds)}`,
+      'Sei arrivato.\n\n' +
+        finalVerdict(
+          this.presentability.percent,
+          this.appointment.lateBySeconds,
+          this.presentability.outfitTier,
+        ),
     );
   }
 

@@ -43,6 +43,8 @@ Il cuore del gioco: la barra che è insieme vita e punteggio.
 - [x] Verdetto finale che incrocia presentabilità e puntualità
 - [x] Le insidie si pagano **entrando**, non restandoci sopra
 - [x] Checkpoint, uno per tratto di marciapiede
+- [x] Abiti di ricambio con tetto decrescente: cambiarsi non è più un premio
+- [x] Inviluppo di salto misurato, e piattaforme alte rese raggiungibili
 - [ ] Altri due o tre nemici dal bestiario
 
 ## Fase 3 — Mondo vero

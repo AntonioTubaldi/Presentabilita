@@ -1,23 +1,33 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
 import { formatClock, type Appointment } from '../game/appointment';
-import { MAX_PRESENTABILITY, STARTING_OUTFITS, type Presentability } from '../game/presentability';
+import {
+  MAX_PRESENTABILITY,
+  OUTFITS,
+  STARTING_OUTFITS,
+  type Presentability,
+} from '../game/presentability';
 import { mixColor } from '../utils/color';
 
 const BAR = { width: 150, height: 8, right: 16, top: 16 } as const;
 const OUTFIT = { width: 9, height: 13, gap: 4 } as const;
-const MESSAGE_MS = 1400;
+const MESSAGE_MS = 1600;
 
 /**
- * L'interfaccia di gioco: la barra della presentabilità, gli abiti di
- * ricambio rimasti e un messaggio che commenta i guai appena capitati.
+ * L'interfaccia di gioco: l'orologio, la barra della presentabilità, gli
+ * abiti rimasti e un messaggio che commenta i guai appena capitati.
  *
- * La barra cambia colore oltre che lunghezza: a colpo d'occhio si legge
- * "sto ancora bene" o "sono un disastro" senza leggere la percentuale.
+ * La barra mostra anche **il tetto perduto**: la porzione che l'abito attuale
+ * non potrà mai più riempire resta disegnata, spenta, sulla destra. Senza
+ * quella, cambiarsi sembrerebbe un premio — la barra si riempirebbe di nuovo
+ * e il giocatore non vedrebbe di aver perso qualcosa per sempre.
  */
 export class Hud {
+  private readonly barLeft: number;
   private readonly fill: Phaser.GameObjects.Rectangle;
+  private readonly lost: Phaser.GameObjects.Rectangle;
   private readonly label: Phaser.GameObjects.Text;
+  private readonly outfitLabel: Phaser.GameObjects.Text;
   private readonly outfitIcons: Phaser.GameObjects.Rectangle[] = [];
   private readonly outfitShirts: Phaser.GameObjects.Rectangle[] = [];
   private readonly clock: Phaser.GameObjects.Text;
@@ -26,9 +36,15 @@ export class Hud {
 
   constructor(scene: Phaser.Scene) {
     const left = GAME_WIDTH - BAR.right - BAR.width;
+    const right = GAME_WIDTH - BAR.right;
+    this.barLeft = left;
 
     const frame = scene.add.rectangle(left, BAR.top, BAR.width, BAR.height, COLORS.background);
     frame.setOrigin(0, 0.5).setStrokeStyle(1, COLORS.barFrame).setScrollFactor(0);
+
+    // Il tetto perduto sta sotto il riempimento: si vede solo dove questo non arriva.
+    this.lost = scene.add.rectangle(left, BAR.top, BAR.width, BAR.height, COLORS.barLost);
+    this.lost.setOrigin(0, 0.5).setScrollFactor(0);
 
     // Origine a sinistra: la barra si accorcia scalando, senza ricalcolare la geometria.
     this.fill = scene.add.rectangle(left, BAR.top, BAR.width, BAR.height, COLORS.barGood);
@@ -38,9 +54,9 @@ export class Hud {
       .text(left, BAR.top + 8, '', { fontFamily: 'monospace', fontSize: '9px', color: COLORS.text })
       .setScrollFactor(0);
 
-    // Abiti di ricambio, disegnati da destra verso sinistra.
+    // Abiti rimasti, disegnati da destra verso sinistra.
     for (let i = 0; i < STARTING_OUTFITS; i++) {
-      const x = GAME_WIDTH - BAR.right - OUTFIT.width / 2 - i * (OUTFIT.width + OUTFIT.gap);
+      const x = right - OUTFIT.width / 2 - i * (OUTFIT.width + OUTFIT.gap);
       const y = BAR.top + 28;
       const jacket = scene.add.rectangle(x, y, OUTFIT.width, OUTFIT.height, COLORS.outfit);
       jacket.setStrokeStyle(1, COLORS.barFrame).setScrollFactor(0);
@@ -49,6 +65,15 @@ export class Hud {
       this.outfitIcons.push(jacket);
       this.outfitShirts.push(shirt);
     }
+
+    this.outfitLabel = scene.add
+      .text(right, BAR.top + 40, '', {
+        fontFamily: 'monospace',
+        fontSize: '8px',
+        color: COLORS.textDim,
+      })
+      .setOrigin(1, 0)
+      .setScrollFactor(0);
 
     this.clock = scene.add
       .text(GAME_WIDTH / 2, 14, '', {
@@ -62,8 +87,9 @@ export class Hud {
     this.message = scene.add
       .text(GAME_WIDTH / 2, 64, '', {
         fontFamily: 'monospace',
-        fontSize: '12px',
+        fontSize: '11px',
         color: COLORS.text,
+        align: 'center',
       })
       .setOrigin(0.5, 0.5)
       .setScrollFactor(0);
@@ -86,13 +112,22 @@ export class Hud {
     this.updateClock(appointment);
 
     const ratio = presentability.percent / MAX_PRESENTABILITY;
+    const ceilingRatio = presentability.ceiling / MAX_PRESENTABILITY;
+
     this.fill.scaleX = ratio;
     this.fill.setFillStyle(mixColor(COLORS.barBad, COLORS.barGood, ratio));
+
+    // La zona perduta parte dal tetto e arriva in fondo alla barra.
+    this.lost.x = this.barLeft + BAR.width * ceilingRatio;
+    this.lost.scaleX = 1 - ceilingRatio;
     this.label.setText(`PRESENTABILITA  ${Math.round(presentability.percent)}%`);
 
+    const tier = presentability.outfitTier;
+    this.outfitLabel.setText(OUTFITS[tier]?.short ?? '');
+    this.outfitLabel.setColor(tier === 0 ? COLORS.textDim : COLORS.textWarn);
+
     for (let i = 0; i < this.outfitIcons.length; i++) {
-      // Un'icona per ogni abito ancora disponibile, quello indosso compreso:
-      // tre icone accese = tre tentativi, che è come il giocatore le legge.
+      // Un'icona per ogni abito ancora disponibile, quello indosso compreso.
       const available = i < presentability.outfitsLeft;
       this.outfitIcons[i]?.setFillStyle(available ? COLORS.outfit : COLORS.outfitSpent);
       this.outfitShirts[i]?.setVisible(available);

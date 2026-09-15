@@ -82,8 +82,16 @@ Valori **misurati sul gioco in esecuzione**, non calcolati sulla carta:
 | Colpo di piccione | 14 punti |
 | Scorta di una fontanella | 36 punti |
 | Lunghezza del percorso | 2560 px (quattro schermate) |
-| Corsa diretta dall'inizio alla fine | 16,4 s, si arriva al 63% |
+| Corsa diretta dall'inizio alla fine | 16,0 s, tirando dritto su tutto si arriva al 18% |
 | Limite prima del ritardo | 28 s |
+| Tetto degli abiti di ricambio | 100% → 55% → 30% |
+
+Cambiarsi d'abito non riempie la barra: ne abbassa il tetto. Senza questo il
+gioco premiava chi si rovinava apposta prima del traguardo.
+
+Per piazzare una piattaforma serve l'**inviluppo di salto** documentato in
+[GAMEDESIGN.md](GAMEDESIGN.md): a +50 px di dislivello la finestra utile va da
+34 a 68 px oltre il punto di stacco.
 
 Le insidie si pagano **entrando**, non restandoci sopra: stare fermi in una
 pozzanghera non sporca di più, e un sacco di spazzatura fa danno una volta
