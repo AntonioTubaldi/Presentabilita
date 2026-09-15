@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
+import { mixColor } from '../utils/color';
 import { BASE_GRAVITY, JUMP_VELOCITY, TUNING } from './tuning';
 
 const KeyCodes = Phaser.Input.Keyboard.KeyCodes;
@@ -45,7 +46,7 @@ export class Player {
   private rising = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.view = scene.add.rectangle(x, y, PLAYER_WIDTH, PLAYER_HEIGHT, COLORS.player);
+    this.view = scene.add.rectangle(x, y, PLAYER_WIDTH, PLAYER_HEIGHT, COLORS.playerClean);
     scene.physics.add.existing(this.view);
 
     this.body = this.view.body as Phaser.Physics.Arcade.Body;
@@ -153,6 +154,15 @@ export class Player {
       if (Phaser.Input.Keyboard.JustDown(key)) pressed = true;
     }
     return pressed;
+  }
+
+  /**
+   * Sporca il personaggio a vista: `filth` va da 0 (immacolato) a 1 (disastro).
+   * È il riscontro più immediato che il giocatore ha sul proprio stato —
+   * si vede prima ancora di guardare la barra.
+   */
+  setFilth(filth: number): void {
+    this.view.setFillStyle(mixColor(COLORS.playerClean, COLORS.playerFilthy, filth));
   }
 
   getDebugState(): PlayerDebugState {

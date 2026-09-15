@@ -1,9 +1,16 @@
 # Presentabilità
 
-Un platformer 2D scritto in TypeScript con [Phaser 4](https://phaser.io/), costruito passo per passo.
+Un ragazzo deve attraversare la città per arrivare a un appuntamento, e la città
+fa di tutto per sporcarlo. Platformer 2D in TypeScript con
+[Phaser 4](https://phaser.io/), costruito passo per passo.
 
-Stato attuale: **Fase 1 — accordatura dei controlli.** Il personaggio è un rettangolo
-e non c'è ancora grafica: si sta lavorando solo su come si sente il movimento.
+La **presentabilità** è insieme vita e punteggio: si consuma sporcandosi, e quanto
+te ne resta all'arrivo decide come reagisce lei. Arrivare e arrivare *bene* sono
+due obiettivi diversi.
+
+Stato attuale: **Fase 2 — la meccanica centrale.** I personaggi sono ancora
+rettangoli colorati: la grafica arriva in Fase 5, quando il gioco sarà divertente
+anche senza.
 
 ## Avvio
 
@@ -29,7 +36,7 @@ Poi apri http://localhost:5173.
 | --- | --- |
 | `←` `→` oppure `A` `D` | Muoviti |
 | `Spazio`, `W` o `↑` | Salta (tieni premuto per saltare più in alto) |
-| `R` | Torna al punto di partenza |
+| `R` | Ricomincia il livello da capo |
 | `Tab` | Mostra/nascondi i valori di debug |
 
 In sviluppo sono attivi anche i riquadri dei corpi fisici e l'oggetto `game`
@@ -41,17 +48,21 @@ nella console del browser, per ispezionare scene e corpi mentre si gioca.
 src/
   main.ts                    configurazione di Phaser e avvio
   config.ts                  dimensioni logiche e palette
-  player/tuning.ts           TUTTI i numeri che decidono il "feel"  ← si lavora qui
+  player/tuning.ts           TUTTI i numeri che decidono il "feel" del movimento
   player/PlayerController.ts logica di corsa e salto
-  scenes/GameScene.ts        livello di prova
+  game/presentability.ts     la barra che è insieme vita e punteggio
+  world/hazards.ts           pozzanghere, spazzatura, fontanelle
+  enemies/Pigeon.ts          piccioni e relativi bombardamenti
+  ui/Hud.ts                  barra, abiti di ricambio, messaggi
+  scenes/GameScene.ts        il livello
 ```
 
-Il file che conta in questa fase è **`src/player/tuning.ts`**. Cambia quei valori,
-non il codice del controller, finché il salto non ti sembra giusto al tatto.
+Per accordare il movimento si tocca **solo** `src/player/tuning.ts`; per
+bilanciare i danni, le costanti in cima a `src/world/hazards.ts`.
 
 ## Come si comporta oggi
 
-Valori misurati sul gioco in esecuzione con il tuning attuale:
+Valori **misurati sul gioco in esecuzione**, non calcolati sulla carta:
 
 | Grandezza | Valore |
 | --- | --- |
@@ -61,9 +72,17 @@ Valori misurati sul gioco in esecuzione con il tuning attuale:
 | Velocità di corsa | 170 px/s, arresto in 7 px |
 | Coyote time | 0,10 s (5 frame concessi) |
 | Jump buffer | 0,12 s |
+| Costo pozzanghera a velocità massima | 16 punti |
+| Costo pozzanghera camminando piano | ~7 punti |
+| Costo sacco di spazzatura | 10 punti |
+| Colpo di piccione | 14 punti |
+| Scorta di una fontanella | 36 punti |
 
-Le distanze del livello di prova sono tarate su questi numeri: se cambi
-`tuning.ts`, vanno rimisurate, altrimenti alcuni salti diventano impossibili.
+Chi tira dritto su ogni ostacolo arriva intorno al 31%; chi salta tutto arriva
+al 100%. È lo spazio di manovra che rende il livello interessante.
+
+Le distanze del livello sono tarate su questi numeri: se cambi `tuning.ts`,
+vanno rimisurate, altrimenti alcuni salti diventano impossibili.
 
 ## Roadmap
 

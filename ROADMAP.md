@@ -3,6 +3,12 @@
 Ogni fase si chiude con qualcosa di giocabile, non con codice a metà.
 Si passa alla fase successiva solo quando la precedente è divertente da provare.
 
+> **Nota sull'ordine.** Le fasi 2 e 3 sono state scambiate rispetto al piano
+> iniziale: prima si dimostra che la meccanica centrale diverte, poi si
+> costruiscono gli strumenti per fare tanti livelli. Costruire l'editor di
+> livelli prima di sapere se il gioco funziona è il modo classico di
+> ritrovarsi con dieci livelli da buttare.
+
 ---
 
 ## Fase 0 — Fondamenta ✅
@@ -10,58 +16,59 @@ Si passa alla fase successiva solo quando la precedente è divertente da provare
 - [x] Progetto Vite + TypeScript + Phaser 4 che parte con `npm run dev`
 - [x] Controllo dei tipi in `npm run build`
 - [x] Pubblicazione automatica su GitHub Pages ad ogni push su `main`
-- [x] Documentazione di partenza
 
-## Fase 1 — Il salto deve essere bello ⬅️ **siamo qui**
-
-La fase che decide il gioco. Un platformer con brutti controlli non si salva con
-nessuna grafica; uno con ottimi controlli è già divertente con i rettangoli.
+## Fase 1 — Il salto deve essere bello ✅
 
 - [x] Corsa con accelerazione e attrito separati, a terra e in aria
-- [x] Salto ad altezza variabile (tocchi = saltello, tieni = salto pieno)
+- [x] Salto ad altezza variabile
 - [x] Gravità asimmetrica: si scende più in fretta di quanto si sale
-- [x] Coyote time — salto concesso poco dopo aver lasciato la piattaforma
-- [x] Jump buffer — salto memorizzato se premuto poco prima di atterrare
+- [x] Coyote time e jump buffer
 - [x] Livello-palestra tarato sulle distanze reali del salto
-- [ ] **Accordatura a mano dei valori in `tuning.ts` finché non convince**
-- [ ] Decidere se servono meccaniche in più (scatto, doppio salto, aggrapparsi ai muri)
+- [x] **Approvato alla prova pratica**
 
-Criterio per considerarla chiusa: saltare tra le piattaforme è piacevole anche
-senza nessun obiettivo da raggiungere.
+## Fase 2 — La presentabilità ⬅️ **siamo qui**
 
-## Fase 2 — Mondo vero
+Il cuore del gioco: la barra che è insieme vita e punteggio.
+
+- [x] Barra della presentabilità, da 100 a 0
+- [x] Abiti di ricambio come vite, con cambio automatico a zero
+- [x] Il personaggio si sporca a vista mentre la barra scende
+- [x] Pozzanghere, con costo proporzionale alla velocità d'impatto
+- [x] Sacchi di spazzatura attraversabili: saltarli o pagarli
+- [x] Fontanelle che ripuliscono, ma con scorta limitata
+- [x] Piccioni che pattugliano e bombardano
+- [x] Traguardo con verdetto finale in base a quanto sei arrivato in ordine
+- [ ] **L'orologio: lei sta aspettando** — vedi GAMEDESIGN.md, è l'aggiunta
+      che trasforma "schiva le cose" in "scegli cosa sacrificare"
+- [ ] Checkpoint, invece di ripartire sempre dall'inizio
+- [ ] Altri due o tre nemici dal bestiario
+
+## Fase 3 — Mondo vero
 
 - [ ] Livelli disegnati in [Tiled](https://www.mapeditor.org/) invece che a mano nel codice
 - [ ] Collisioni sul layer della tilemap
 - [ ] Camera che segue il giocatore con zona morta e inseguimento morbido
-- [ ] Limiti del mondo più grandi di uno schermo
-- [ ] Un livello completo percorribile da inizio a fine
-
-## Fase 3 — Opposizione
-
-- [ ] 2-3 nemici con comportamenti diversi (pattuglia, inseguitore, ostacolo fisso)
-- [ ] Danno al giocatore e invulnerabilità temporanea
-- [ ] Vite e schermata di sconfitta
-- [ ] Checkpoint e respawn
-- [ ] Trappole ambientali (spuntoni, piattaforme mobili)
+- [ ] Livelli più lunghi di uno schermo
+- [ ] Scorciatoie rischiose: più rapide, più sporche
 
 ## Fase 4 — Contenuto
 
-- [ ] 5-8 livelli con una curva di difficoltà pensata
-- [ ] Collezionabili e porta di uscita
-- [ ] Schermata di transizione tra un livello e l'altro
-- [ ] Progressione salvata nel browser
-- [ ] Cronometro e record personali
+- [ ] 5-8 tappe del percorso con una curva di difficoltà pensata
+- [ ] Il mazzo di fiori da proteggere
+- [ ] Schermata di transizione fra una tappa e l'altra
+- [ ] Progressione e record salvati nel browser
+- [ ] Una piccola scena comica al termine di ogni tappa
 
 ## Fase 5 — Juice
 
 Il punto in cui il gioco smette di sembrare un prototipo.
 
 - [ ] Sprite e animazioni (fermo, corsa, salto, caduta, atterraggio)
-- [ ] Particelle: polvere allo stacco e all'atterraggio
+- [ ] Le macchie si vedono sul vestito, non come cambio di colore
+- [ ] Particelle: schizzi d'acqua, polvere allo stacco
 - [ ] Screenshake e deformazione del personaggio (squash & stretch)
 - [ ] Effetti sonori e musica
-- [ ] Menu principale, pausa, opzioni (volume, rimappatura tasti)
+- [ ] Menu principale, pausa, opzioni
 
 ## Fase 6 — Pubblicazione
 
