@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_HEIGHT } from '../config';
 
 export const PIGEON_STAIN = 14;
 
@@ -16,38 +16,40 @@ const DROPPING_FALL_SPEED = 170;
 
 const DROP_INTERVAL_MS = { min: 1100, max: 2300 } as const;
 
-/** Margine oltre i bordi entro cui il piccione inverte la rotta. */
-const PATROL_MARGIN = 24;
+/** Ogni piccione ha la sua zona di competenza: [x minima, x massima, quota]. */
+export interface PigeonSpec {
+  readonly minX: number;
+  readonly maxX: number;
+  readonly y: number;
+  readonly speed: number;
+}
 
 export class Pigeon {
   readonly view: Phaser.GameObjects.Rectangle;
-  private readonly body: Phaser.Physics.Arcade.Body;
+  readonly body: Phaser.Physics.Arcade.Body;
   private readonly scene: Phaser.Scene;
   private readonly droppings: Phaser.GameObjects.Group;
+  private readonly spec: PigeonSpec;
   private nextDropAt = 0;
 
-  constructor(
-    scene: Phaser.Scene,
-    droppings: Phaser.GameObjects.Group,
-    x: number,
-    y: number,
-    speed: number,
-  ) {
+  constructor(scene: Phaser.Scene, droppings: Phaser.GameObjects.Group, spec: PigeonSpec) {
     this.scene = scene;
     this.droppings = droppings;
+    this.spec = spec;
 
-    this.view = scene.add.rectangle(x, y, PIGEON_WIDTH, PIGEON_HEIGHT, COLORS.pigeon);
+    const startX = (spec.minX + spec.maxX) / 2;
+    this.view = scene.add.rectangle(startX, spec.y, PIGEON_WIDTH, PIGEON_HEIGHT, COLORS.pigeon);
     scene.physics.add.existing(this.view);
     this.body = this.view.body as Phaser.Physics.Arcade.Body;
     this.body.setAllowGravity(false);
-    this.body.setVelocityX(speed);
+    this.body.setVelocityX(spec.speed);
   }
 
   update(time: number): void {
-    // Pattuglia avanti e indietro sopra la strada.
-    if (this.view.x < PATROL_MARGIN && this.body.velocity.x < 0) {
+    // Pattuglia avanti e indietro sopra il proprio tratto di strada.
+    if (this.view.x < this.spec.minX && this.body.velocity.x < 0) {
       this.body.setVelocityX(-this.body.velocity.x);
-    } else if (this.view.x > GAME_WIDTH - PATROL_MARGIN && this.body.velocity.x > 0) {
+    } else if (this.view.x > this.spec.maxX && this.body.velocity.x > 0) {
       this.body.setVelocityX(-this.body.velocity.x);
     }
 

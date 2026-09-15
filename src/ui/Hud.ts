@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
+import { formatClock, type Appointment } from '../game/appointment';
 import { MAX_PRESENTABILITY, STARTING_OUTFITS, type Presentability } from '../game/presentability';
 import { mixColor } from '../utils/color';
 
@@ -19,6 +20,7 @@ export class Hud {
   private readonly label: Phaser.GameObjects.Text;
   private readonly outfitIcons: Phaser.GameObjects.Rectangle[] = [];
   private readonly outfitShirts: Phaser.GameObjects.Rectangle[] = [];
+  private readonly clock: Phaser.GameObjects.Text;
   private readonly message: Phaser.GameObjects.Text;
   private messageUntil = 0;
 
@@ -48,8 +50,17 @@ export class Hud {
       this.outfitShirts.push(shirt);
     }
 
+    this.clock = scene.add
+      .text(GAME_WIDTH / 2, 14, '', {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: COLORS.text,
+      })
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0);
+
     this.message = scene.add
-      .text(GAME_WIDTH / 2, 60, '', {
+      .text(GAME_WIDTH / 2, 64, '', {
         fontFamily: 'monospace',
         fontSize: '12px',
         color: COLORS.text,
@@ -58,7 +69,22 @@ export class Hud {
       .setScrollFactor(0);
   }
 
-  update(presentability: Presentability, time: number): void {
+  /** L'orologio cambia colore prima di scadere: l'avviso deve arrivare in tempo. */
+  private updateClock(appointment: Appointment): void {
+    if (appointment.isLate) {
+      this.clock.setText(`IN RITARDO  ${formatClock(appointment.lateBySeconds)}`);
+      this.clock.setColor(COLORS.textLate);
+      return;
+    }
+
+    const left = appointment.remainingSeconds;
+    this.clock.setText(`LEI TI ASPETTA  ${formatClock(left)}`);
+    this.clock.setColor(left <= 10 ? COLORS.textWarn : COLORS.text);
+  }
+
+  update(presentability: Presentability, appointment: Appointment, time: number): void {
+    this.updateClock(appointment);
+
     const ratio = presentability.percent / MAX_PRESENTABILITY;
     this.fill.scaleX = ratio;
     this.fill.setFillStyle(mixColor(COLORS.barBad, COLORS.barGood, ratio));

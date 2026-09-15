@@ -64,16 +64,4 @@ export class Presentability {
     this.value = MAX_PRESENTABILITY;
     this.outfits = STARTING_OUTFITS;
   }
-
-  /**
-   * Il giudizio finale sul ragazzo, in base a quanto è arrivato in ordine.
-   * È la ricompensa comica del livello: la ragione per rigiocare.
-   */
-  verdict(): string {
-    if (this.value >= 95) return 'Impeccabile. Lei sorride.';
-    if (this.value >= 75) return 'Un po’ spettinato, ma va benissimo.';
-    if (this.value >= 50) return 'Lei fa finta di non notare la macchia.';
-    if (this.value >= 25) return 'Lei propone di sedersi… fuori.';
-    return 'Lei ha appena ricordato di avere un impegno.';
-  }
 }

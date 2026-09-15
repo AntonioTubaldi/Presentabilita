@@ -1,12 +1,22 @@
-/** Dimensioni logiche del gioco. Il canvas viene poi scalato per riempire la finestra. */
+/** Dimensioni della finestra di gioco. Il canvas viene poi scalato per riempire lo schermo. */
 export const GAME_WIDTH = 640;
 export const GAME_HEIGHT = 360;
+
+/**
+ * Larghezza del livello: quattro schermate abbondanti.
+ * La telecamera segue il ragazzo lungo la strada.
+ */
+export const WORLD_WIDTH = 2560;
 
 /** Palette provvisoria: rettangoli colorati, zero grafica. Si sostituisce in Fase 5. */
 export const COLORS = {
   background: 0x12111a,
   platform: 0x3d4466,
   platformEdge: 0x5a628f,
+
+  /** Palazzi sullo sfondo, su due piani di profondità. */
+  skylineFar: 0x1a1926,
+  skylineNear: 0x232336,
 
   /** Il ragazzo, da immacolato a disastro: si interpola tra questi due. */
   playerClean: 0xf0c674,
@@ -28,4 +38,6 @@ export const COLORS = {
   outfitSpent: 0x2a2a35,
   text: '#c8cce0',
   textDim: '#7a819c',
+  textWarn: '#e8a33d',
+  textLate: '#e05a4f',
 } as const;

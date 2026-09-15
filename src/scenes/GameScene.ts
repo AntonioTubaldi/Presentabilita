@@ -1,14 +1,19 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
-import { Pigeon, PIGEON_STAIN, pruneDroppings } from '../enemies/Pigeon';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH, WORLD_WIDTH } from '../config';
+import { Pigeon, PIGEON_STAIN, pruneDroppings, type PigeonSpec } from '../enemies/Pigeon';
+import { Appointment } from '../game/appointment';
 import { Presentability } from '../game/presentability';
+import { finalVerdict } from '../game/verdict';
 import { Player } from '../player/PlayerController';
 import { Hud } from '../ui/Hud';
+import { createSkyline } from '../world/skyline';
 import {
+  consumeTrash,
   createHazards,
   drainFountain,
-  HAZARD_COOLDOWN_MS,
+  FOUNTAIN_INTERVAL_MS,
   puddleCost,
+  rollHazardContacts,
   TRASH_COST,
   type Hazard,
   type HazardSpec,
@@ -20,45 +25,90 @@ const KeyCodes = Phaser.Input.Keyboard.KeyCodes;
 type PlatformSpec = readonly [number, number, number, number];
 
 /**
- * Il primo tratto di strada verso l'appuntamento.
+ * Il percorso verso l'appuntamento: quattro schermate di strada.
  *
  * Le distanze sono tarate su valori misurati, non teorici: con il tuning
  * attuale un salto pieno alza di ≈ 59 px e sposta di ≈ 75 px in avanti
- * partendo a velocità massima. Nessun dislivello supera i 51 px e il varco
- * largo è 55 px. Se cambi `tuning.ts`, queste distanze vanno rimisurate.
+ * partendo a velocità massima. Nessun dislivello supera i 51 px e nessun
+ * varco i 55 px. Se cambi `tuning.ts`, queste distanze vanno rimisurate.
  */
 const PLATFORMS: readonly PlatformSpec[] = [
-  // Marciapiede, spezzato da due varchi: 55 px e 25 px
-  [120, 350, 240, 20], // x   0..240
-  [415, 350, 240, 20], // x 295..535
-  [600, 350, 80, 20], // x 560..640
+  // Marciapiede, spezzato da cinque varchi: 55, 25, 45, 50 e 30 px
+  [300, 350, 600, 20], // x    0.. 600
+  [830, 350, 350, 20], // x  655..1005
+  [1235, 350, 410, 20], // x 1030..1440
+  [1662, 350, 355, 20], // x 1485..1840
+  [2110, 350, 440, 20], // x 1890..2330
+  [2460, 350, 200, 20], // x 2360..2560
 
-  // Gradini a sinistra
-  [100, 300, 70, 12], // x  65..135, +46
-  [175, 255, 60, 12], // x 145..205, +45
-
-  // Salita a destra (tenuta oltre x=365 per non intercettare l'atterraggio
-  // di chi salta il varco largo)
-  [400, 295, 70, 12], // x 365..435, +51
-  [510, 245, 80, 12], // x 470..550, +50
-  [600, 195, 70, 12], // x 565..635, +50
+  // Cornicioni e impalcature: la via alta evita le insidie ma costa salti
+  [160, 295, 70, 12],
+  [250, 245, 60, 12],
+  [470, 295, 80, 12],
+  [900, 295, 90, 12],
+  [1150, 295, 70, 12],
+  [1330, 245, 80, 12],
+  [1560, 295, 70, 12],
+  [1750, 245, 90, 12],
+  [2000, 295, 80, 12],
+  [2200, 245, 70, 12],
 ];
 
 /**
- * Le insidie non sono solide: si possono attraversare pagandone il prezzo.
- * Ognuna è piazzata dove costringe a una scelta, non dove fa solo arredamento.
+ * Le insidie non sono solide: si attraversano pagandone il prezzo.
+ * Ognuna è piazzata dove costringe a una scelta — spesso poco prima di un
+ * varco, così saltarla bene serve comunque a qualcosa.
  */
 const HAZARDS: readonly HazardSpec[] = [
-  ['pozzanghera', 160, 337, 46, 6], // sul rettilineo di partenza, si prende velocità
-  ['spazzatura', 205, 332, 16, 16], // subito prima del varco: saltarlo bene serve comunque
-  ['fontanella', 320, 322, 24, 36], // premio per chi supera il varco: ci si rassetta
-  ['pozzanghera', 370, 337, 50, 6],
-  ['spazzatura', 460, 332, 16, 16],
-  ['pozzanghera', 505, 337, 40, 6],
+  ['pozzanghera', 200, 337, 50, 6],
+  ['spazzatura', 380, 332, 16, 16],
+  ['pozzanghera', 540, 337, 44, 6], // subito prima del varco largo
+  ['fontanella', 700, 322, 24, 36], // premio per chi lo supera
+  ['spazzatura', 960, 332, 16, 16],
+  ['pozzanghera', 1100, 337, 55, 6],
+  ['spazzatura', 1250, 332, 16, 16],
+  ['fontanella', 1600, 322, 24, 36],
+  ['spazzatura', 1790, 332, 16, 16],
+  ['pozzanghera', 1950, 337, 50, 6],
+  ['pozzanghera', 2250, 337, 60, 6],
 ];
 
-const PLAYER_START = { x: 30, y: 300 } as const;
-const GOAL = { x: 615, y: 320, width: 22, height: 40 } as const;
+const PIGEONS: readonly PigeonSpec[] = [
+  { minX: 700, maxX: 1000, y: 160, speed: 70 },
+  { minX: 1300, maxX: 1700, y: 140, speed: -90 },
+  { minX: 2000, maxX: 2300, y: 170, speed: 80 },
+];
+
+/**
+ * Punti di ripartenza, uno per tratto di marciapiede. Senza, cadere in un
+ * tombino a tre quarti del percorso rimanderebbe all'inizio — con l'orologio
+ * che scorre sarebbe la fine della partita, non un intoppo.
+ */
+const CHECKPOINTS: readonly { x: number; y: number }[] = [
+  { x: 30, y: 300 },
+  { x: 690, y: 300 },
+  { x: 1060, y: 300 },
+  { x: 1520, y: 300 },
+  { x: 1920, y: 300 },
+  { x: 2390, y: 300 },
+];
+
+const GOAL = { x: 2500, y: 320, width: 22, height: 40 } as const;
+
+/**
+ * Quanto tempo c'è prima di essere in ritardo.
+ *
+ * Tarato su una misura, non a occhio: una corsa diretta che tira dritto su
+ * tutto e salta solo i varchi arriva in **16,4 secondi**. Ventotto danno
+ * quindi circa il 70% di margine — abbastanza per scavalcare le insidie e
+ * spendere una fontanella, non abbastanza per attraversare la città
+ * passeggiando.
+ *
+ * È il numero più delicato del gioco: troppo largo e l'orologio non conta,
+ * troppo stretto e diventa una punizione. Va rimisurato ogni volta che il
+ * percorso si allunga o cambia il tuning del movimento.
+ */
+const LEVEL_TIME_MS = 28_000;
 
 type Phase = 'gioco' | 'finito';
 
@@ -66,9 +116,12 @@ export class GameScene extends Phaser.Scene {
   private player!: Player;
   private hud!: Hud;
   private presentability!: Presentability;
-  private pigeon!: Pigeon;
+  private appointment!: Appointment;
+  private pigeons: Pigeon[] = [];
   private droppings!: Phaser.GameObjects.Group;
+  private hazards: Hazard[] = [];
   private hazardsByView = new Map<Phaser.GameObjects.GameObject, Hazard>();
+  private checkpointIndex = 0;
   private phase: Phase = 'gioco';
   private endText!: Phaser.GameObjects.Text;
   private debugText!: Phaser.GameObjects.Text;
@@ -80,10 +133,17 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.phase = 'gioco';
+    this.checkpointIndex = 0;
     this.presentability = new Presentability();
+    this.appointment = new Appointment(LEVEL_TIME_MS);
     this.hazardsByView = new Map();
+    this.pigeons = [];
 
     this.cameras.main.setBackgroundColor(COLORS.background);
+    createSkyline(this);
+
+    // Il bordo inferiore del mondo non collide: nei varchi si cade davvero.
+    this.physics.world.setBounds(0, 0, WORLD_WIDTH, GAME_HEIGHT + 400, true, true, true, false);
 
     const platforms = PLATFORMS.map(([x, y, width, height]) => {
       const rect = this.add.rectangle(x, y, width, height, COLORS.platform);
@@ -92,22 +152,23 @@ export class GameScene extends Phaser.Scene {
       return rect;
     });
 
-    const hazards = createHazards(this, HAZARDS);
-    for (const hazard of hazards) this.hazardsByView.set(hazard.view, hazard);
+    this.hazards = createHazards(this, HAZARDS);
+    for (const hazard of this.hazards) this.hazardsByView.set(hazard.view, hazard);
 
     const goal = this.add.rectangle(GOAL.x, GOAL.y, GOAL.width, GOAL.height, COLORS.barGood);
     goal.setStrokeStyle(1, COLORS.outfitShirt);
     this.physics.add.existing(goal, true);
 
     this.droppings = this.add.group();
-    this.pigeon = new Pigeon(this, this.droppings, 200, 110, 70);
+    for (const spec of PIGEONS) this.pigeons.push(new Pigeon(this, this.droppings, spec));
 
-    this.player = new Player(this, PLAYER_START.x, PLAYER_START.y);
+    const start = CHECKPOINTS[0]!;
+    this.player = new Player(this, start.x, start.y);
     this.physics.add.collider(this.player.view, platforms);
 
     this.physics.add.overlap(
       this.player.view,
-      hazards.map((h) => h.view),
+      this.hazards.map((h) => h.view),
       (_player, hazardView) => this.onHazard(hazardView as Phaser.GameObjects.GameObject),
     );
 
@@ -127,6 +188,10 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player.view, goal, () => this.finish());
 
+    this.cameras.main.setBounds(0, 0, WORLD_WIDTH, GAME_HEIGHT);
+    this.cameras.main.startFollow(this.player.view, true, 0.14, 0.14);
+    this.cameras.main.setDeadzone(110, 90);
+
     this.hud = new Hud(this);
     this.buildTextOverlays();
     this.bindKeys();
@@ -134,7 +199,7 @@ export class GameScene extends Phaser.Scene {
 
   private buildTextOverlays(): void {
     this.add
-      .text(8, 8, '← →  muovi     SPAZIO  salta     R  ricomincia     TAB  debug', {
+      .text(8, 8, '← →  muovi     SPAZIO  salta     R  ricomincia', {
         fontFamily: 'monospace',
         fontSize: '9px',
         color: COLORS.textDim,
@@ -144,13 +209,14 @@ export class GameScene extends Phaser.Scene {
     this.endText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, '', {
         fontFamily: 'monospace',
-        fontSize: '13px',
+        fontSize: '12px',
         color: COLORS.text,
         align: 'center',
-        lineSpacing: 6,
+        lineSpacing: 5,
       })
       .setOrigin(0.5, 0.5)
-      .setScrollFactor(0);
+      .setScrollFactor(0)
+      .setDepth(100);
 
     this.debugText = this.add
       .text(8, 22, '', { fontFamily: 'monospace', fontSize: '9px', color: COLORS.textDim })
@@ -173,23 +239,42 @@ export class GameScene extends Phaser.Scene {
     if (this.phase === 'finito') return;
 
     const now = this.time.now;
+    this.appointment.tick(delta);
     this.player.update(delta);
-    this.pigeon.update(now);
+    for (const pigeon of this.pigeons) pigeon.update(now);
     pruneDroppings(this.droppings);
-    this.hud.update(this.presentability, now);
+    this.updateCheckpoint();
+    this.hud.update(this.presentability, this.appointment, now);
 
-    // Caduta fuori dal marciapiede: si finisce nel tombino, e non è pulito.
+    // Caduta nel varco: si finisce nel tombino, e non è pulito.
+    // L'orologio continua a scorrere: perdere tempo è parte del prezzo.
     if (this.player.view.y > GAME_HEIGHT + 40) {
       this.applyStain(25, 'Nel tombino. Splendido.');
       this.respawn();
     }
 
+    // Va fatto dopo tutte le sovrapposizioni del frame: è il confronto fra
+    // "toccata ora" e "toccata prima" a distinguere l'ingresso dalla sosta.
+    rollHazardContacts(this.hazards);
+
     if (this.debugVisible) {
       const state = this.player.getDebugState();
       this.debugText.setText(
-        `vel x ${state.velocityX.toFixed(0)}  y ${state.velocityY.toFixed(0)}   ` +
-          `terra ${state.onGround ? 'si' : 'no'}   fps ${this.game.loop.actualFps.toFixed(0)}`,
+        `x ${this.player.view.x.toFixed(0)}  vel ${state.velocityX.toFixed(0)}  ` +
+          `t ${this.appointment.elapsedSeconds.toFixed(1)}s  fps ${this.game.loop.actualFps.toFixed(0)}`,
       );
+    }
+  }
+
+  /** Il checkpoint avanza solo con i piedi per terra: non si sblocca cadendo. */
+  private updateCheckpoint(): void {
+    if (!this.player.getDebugState().onGround) return;
+
+    for (let i = CHECKPOINTS.length - 1; i > this.checkpointIndex; i--) {
+      if (this.player.view.x >= CHECKPOINTS[i]!.x) {
+        this.checkpointIndex = i;
+        return;
+      }
     }
   }
 
@@ -197,22 +282,31 @@ export class GameScene extends Phaser.Scene {
     const hazard = this.hazardsByView.get(view);
     if (!hazard) return;
 
-    // Le insidie riscuotono a intervalli: attraversarle di corsa costa una
-    // volta sola, restarci dentro costa a ripetizione.
-    const now = this.time.now;
-    if (now - hazard.lastTriggeredAt < HAZARD_COOLDOWN_MS) return;
-    hazard.lastTriggeredAt = now;
-
+    hazard.touchedThisFrame = true;
     const velocity = this.player.body.velocity;
 
     switch (hazard.kind) {
       case 'pozzanghera':
+        // Si paga entrando. Restare fermi nell'acqua non sporca di più:
+        // sarebbe una punizione scollegata da qualsiasi decisione.
+        if (hazard.wasTouching) return;
         this.applyStain(puddleCost(velocity.x, velocity.y), 'SPLASH');
         break;
+
       case 'spazzatura':
+        // Il sacco fa danno una volta sola, poi si affloscia e sparisce.
+        if (hazard.consumed) return;
+        consumeTrash(hazard, this);
         this.applyStain(TRASH_COST, 'Spazzatura sui pantaloni.');
         break;
+
       case 'fontanella': {
+        // La fontanella invece agisce nel tempo: è l'unica per cui restare
+        // fermi ha senso, ed è esattamente il tempo che costa usarla.
+        const now = this.time.now;
+        if (now - hazard.lastTriggeredAt < FOUNTAIN_INTERVAL_MS) return;
+        hazard.lastTriggeredAt = now;
+
         const given = drainFountain(hazard);
         if (given <= 0) {
           this.hud.flash('La fontanella è a secco.', now);
@@ -248,8 +342,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private finish(): void {
-    const percent = Math.round(this.presentability.percent);
-    this.end(`Sei arrivato.\n\nPresentabilità: ${percent}%\n${this.presentability.verdict()}`);
+    this.end(
+      `Sei arrivato.\n\n${finalVerdict(this.presentability.percent, this.appointment.lateBySeconds)}`,
+    );
   }
 
   private end(message: string): void {
@@ -260,6 +355,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private respawn(): void {
-    this.player.body.reset(PLAYER_START.x, PLAYER_START.y);
+    const checkpoint = CHECKPOINTS[this.checkpointIndex] ?? CHECKPOINTS[0]!;
+    this.player.body.reset(checkpoint.x, checkpoint.y);
   }
 }

@@ -38,17 +38,20 @@ Il cuore del gioco: la barra che è insieme vita e punteggio.
 - [x] Fontanelle che ripuliscono, ma con scorta limitata
 - [x] Piccioni che pattugliano e bombardano
 - [x] Traguardo con verdetto finale in base a quanto sei arrivato in ordine
-- [ ] **L'orologio: lei sta aspettando** — vedi GAMEDESIGN.md, è l'aggiunta
-      che trasforma "schiva le cose" in "scegli cosa sacrificare"
-- [ ] Checkpoint, invece di ripartire sempre dall'inizio
+- [x] **L'orologio: lei sta aspettando** — limite morbido, si può arrivare in
+      ritardo ma entra nel giudizio finale
+- [x] Verdetto finale che incrocia presentabilità e puntualità
+- [x] Le insidie si pagano **entrando**, non restandoci sopra
+- [x] Checkpoint, uno per tratto di marciapiede
 - [ ] Altri due o tre nemici dal bestiario
 
 ## Fase 3 — Mondo vero
 
+- [x] Livello lungo quattro schermate, con scorrimento laterale
+- [x] Camera che segue il giocatore con zona morta e inseguimento morbido
+- [x] Palazzi sullo sfondo su due piani di parallasse
 - [ ] Livelli disegnati in [Tiled](https://www.mapeditor.org/) invece che a mano nel codice
 - [ ] Collisioni sul layer della tilemap
-- [ ] Camera che segue il giocatore con zona morta e inseguimento morbido
-- [ ] Livelli più lunghi di uno schermo
 - [ ] Scorciatoie rischiose: più rapide, più sporche
 
 ## Fase 4 — Contenuto

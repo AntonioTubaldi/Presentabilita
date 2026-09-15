@@ -40,25 +40,47 @@ prezzo. Davanti a un sacco di spazzatura hai sempre due opzioni — saltarlo
 (costa precisione) o tirare dritto (costa presentabilità).
 
 Il costo di una pozzanghera è **proporzionale alla velocità**: attraversarla
-piano è quasi gratis, lanciarcisi a tutta velocità costa il triplo, e
-atterrarci sopra di peso costa ancora di più. Questo trasforma anche la
-fretta in una decisione.
+piano costa 5,6 punti, lanciarcisi a tutta velocità quasi 16, e atterrarci
+sopra di peso ancora di più. Questo trasforma anche la fretta in una
+decisione.
+
+**Si paga entrando, non restando.** Fermarsi dentro una pozzanghera non
+sporca ulteriormente, e un sacco di spazzatura fa danno una volta sola e poi
+si affloscia e sparisce. Un'insidia che continua a riscuotere mentre stai
+fermo è una punizione che il giocatore non collega a nessuna sua decisione —
+e, cosa peggiore, rendeva più conveniente attraversare le pozzanghere di
+corsa che con prudenza, esattamente al contrario di quello che il gioco
+vuole insegnare.
+
+L'unica eccezione è la fontanella, che agisce nel tempo: restare fermi è il
+suo costo, e con l'orologio che scorre è un costo vero.
 
 ---
 
-## La proposta che manca: il tempo
+## L'orologio: lei sta aspettando
 
-**Lei sta aspettando.** Senza una pressione temporale, la strategia ottimale è
-avanzare piano e non sporcarsi mai — cioè annoiarsi. Con un orologio che
-scorre, ogni insidia diventa un vero dilemma: *ci giro intorno o ci passo
-dentro?*
+Senza pressione temporale la strategia ottimale sarebbe avanzare piano e non
+sporcarsi mai — cioè annoiarsi. Con l'orologio ogni insidia diventa un
+dilemma vero: *ci giro intorno o ci passo dentro?*
 
-È la tensione che tiene insieme il gioco: **pulito contro puntuale.** Il
-finale terrebbe conto di entrambi — arrivare immacolati con quaranta minuti
-di ritardo dovrebbe andare peggio che arrivare in orario con una macchia.
+È la tensione che tiene insieme il gioco: **pulito contro puntuale.**
 
-È l'unica aggiunta che secondo me cambia il gioco da "schiva le cose" a
-"scegli cosa sacrificare". La proporrei come prossimo passo.
+Il limite è **morbido**: scaduto il tempo si può ancora arrivare, ma il
+ritardo entra nel giudizio. Il gioco non ti ferma, ti giudica. E il verdetto
+incrocia davvero le due colonne — lo stesso 63% di presentabilità dà *"Lei fa
+finta di non notare nulla"* se sei in orario e *"Lei propone di sedersi…
+fuori"* con venti secondi di ritardo.
+
+Il tempo continua a scorrere anche quando cadi in un tombino o cambi
+d'abito: perdere tempo è parte del prezzo di ogni errore.
+
+### Come si tara
+
+Il limite del livello è il numero più delicato del gioco: troppo largo e
+l'orologio non conta, troppo stretto e diventa una punizione. Si tara su una
+misura, non a occhio — una corsa diretta che tira dritto su tutto e salta
+solo i varchi impiega **16,4 secondi**, e il limite è fissato a **28**, cioè
+circa il 70% di margine. Va rimisurato ogni volta che il percorso si allunga.
 
 ## Altre idee da valutare
 
@@ -154,15 +176,18 @@ Misurati sul gioco in esecuzione, non calcolati:
 | Altezza del salto pieno | 59 px |
 | Gittata del salto a velocità massima | ~75 px |
 | Dislivello massimo superabile | ~56 px |
-| Costo pozzanghera a velocità massima | 16 punti |
-| Costo pozzanghera camminando piano | ~7 punti |
-| Costo sacco di spazzatura | 10 punti |
+| Costo pozzanghera a velocità massima | 15,9 punti |
+| Costo pozzanghera camminando piano | 5,6 punti |
+| Costo sacco di spazzatura | 10 punti (una volta sola) |
 | Colpo di piccione | 14 punti |
 | Scorta di una fontanella | 36 punti |
+| Lunghezza del percorso | 2560 px, quattro schermate |
+| Corsa diretta dall'inizio alla fine | 16,4 s, si arriva al 63% |
+| Limite prima del ritardo | 28 s |
 
-Con questi numeri, chi tira dritto su tutto arriva intorno al 31% ("Lei
-propone di sedersi… fuori") e chi salta tutto arriva al 100%. È lo spazio di
-manovra che rende il livello interessante.
+Chi tira dritto su tutto arriva intorno al 63% e in orario; chi si ferma a
+ripulirsi arriva più pulito ma rischia il ritardo. È lo spazio fra queste due
+strategie che rende il livello interessante.
 
 Questi valori sono il vocabolario con cui si scrivono i livelli: se cambiano,
 tutti i livelli già disegnati vanno ricontrollati.

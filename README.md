@@ -5,12 +5,13 @@ fa di tutto per sporcarlo. Platformer 2D in TypeScript con
 [Phaser 4](https://phaser.io/), costruito passo per passo.
 
 La **presentabilità** è insieme vita e punteggio: si consuma sporcandosi, e quanto
-te ne resta all'arrivo decide come reagisce lei. Arrivare e arrivare *bene* sono
-due obiettivi diversi.
+te ne resta all'arrivo decide come reagisce lei. Ma lei sta anche aspettando, e
+l'orologio scorre: il gioco è la tensione fra **arrivare puliti** e **arrivare
+puntuali**.
 
-Stato attuale: **Fase 2 — la meccanica centrale.** I personaggi sono ancora
-rettangoli colorati: la grafica arriva in Fase 5, quando il gioco sarà divertente
-anche senza.
+Stato attuale: **Fase 2-3 — meccanica centrale e percorso a scorrimento.**
+I personaggi sono ancora rettangoli colorati: la grafica arriva in Fase 5,
+quando il gioco sarà divertente anche senza.
 
 ## Avvio
 
@@ -47,14 +48,17 @@ nella console del browser, per ispezionare scene e corpi mentre si gioca.
 ```
 src/
   main.ts                    configurazione di Phaser e avvio
-  config.ts                  dimensioni logiche e palette
+  config.ts                  dimensioni, larghezza del mondo e palette
   player/tuning.ts           TUTTI i numeri che decidono il "feel" del movimento
   player/PlayerController.ts logica di corsa e salto
   game/presentability.ts     la barra che è insieme vita e punteggio
+  game/appointment.ts        l'orologio: lei sta aspettando
+  game/verdict.ts            il giudizio finale, che incrocia pulizia e puntualità
   world/hazards.ts           pozzanghere, spazzatura, fontanelle
+  world/skyline.ts           i palazzi in parallasse sullo sfondo
   enemies/Pigeon.ts          piccioni e relativi bombardamenti
-  ui/Hud.ts                  barra, abiti di ricambio, messaggi
-  scenes/GameScene.ts        il livello
+  ui/Hud.ts                  barra, orologio, abiti di ricambio, messaggi
+  scenes/GameScene.ts        il percorso e le regole che lo governano
 ```
 
 Per accordare il movimento si tocca **solo** `src/player/tuning.ts`; per
@@ -72,14 +76,19 @@ Valori **misurati sul gioco in esecuzione**, non calcolati sulla carta:
 | Velocità di corsa | 170 px/s, arresto in 7 px |
 | Coyote time | 0,10 s (5 frame concessi) |
 | Jump buffer | 0,12 s |
-| Costo pozzanghera a velocità massima | 16 punti |
-| Costo pozzanghera camminando piano | ~7 punti |
-| Costo sacco di spazzatura | 10 punti |
+| Costo pozzanghera a velocità massima | 15,9 punti |
+| Costo pozzanghera camminando piano | 5,6 punti |
+| Costo sacco di spazzatura | 10 punti, una volta sola |
 | Colpo di piccione | 14 punti |
 | Scorta di una fontanella | 36 punti |
+| Lunghezza del percorso | 2560 px (quattro schermate) |
+| Corsa diretta dall'inizio alla fine | 16,4 s, si arriva al 63% |
+| Limite prima del ritardo | 28 s |
 
-Chi tira dritto su ogni ostacolo arriva intorno al 31%; chi salta tutto arriva
-al 100%. È lo spazio di manovra che rende il livello interessante.
+Le insidie si pagano **entrando**, non restandoci sopra: stare fermi in una
+pozzanghera non sporca di più, e un sacco di spazzatura fa danno una volta
+sola e poi sparisce. L'unica eccezione è la fontanella, che agisce nel tempo —
+e il tempo, con l'orologio che scorre, è proprio ciò che costa usarla.
 
 Le distanze del livello sono tarate su questi numeri: se cambi `tuning.ts`,
 vanno rimisurate, altrimenti alcuni salti diventano impossibili.
