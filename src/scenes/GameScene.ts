@@ -14,6 +14,7 @@ import {
   FOUNTAIN_INTERVAL_MS,
   puddleCost,
   rollHazardContacts,
+  takeUmbrella,
   TRASH_COST,
   type Hazard,
   type HazardSpec,
@@ -70,10 +71,12 @@ const HAZARDS: readonly HazardSpec[] = [
   ['pozzanghera', 540, 337, 44, 6], // subito prima del varco largo
   ['fontanella', 700, 322, 24, 36], // premio per chi lo supera
   ['spazzatura', 960, 332, 16, 16],
+  ['ombrellaio', 1055, 322, 24, 36], // prima della seconda zona dei piccioni
   ['pozzanghera', 1100, 337, 55, 6],
   ['spazzatura', 1250, 332, 16, 16],
   ['fontanella', 1600, 322, 24, 36],
   ['spazzatura', 1790, 332, 16, 16],
+  ['ombrellaio', 1905, 322, 24, 36], // prima della terza
   ['pozzanghera', 1950, 337, 50, 6],
   ['pozzanghera', 2190, 337, 60, 6], // spostata: chi scende dalla via alta atterra a ~2257
 ];
@@ -188,6 +191,20 @@ export class GameScene extends Phaser.Scene {
       body.enable = false;
 
       shot.destroy();
+
+      // L'ombrello para ciò che viene dall'alto, e solo quello: è mezza
+      // soluzione per costruzione, altrimenti basterebbe tenerlo sempre aperto.
+      if (this.player.umbrella.isOpen) {
+        const esito = this.player.umbrella.absorb();
+        this.hud.flash(
+          esito === 'rotto'
+            ? "L'ombrello ha ceduto. Ti serve un ombrellaio."
+            : 'TOC. L’ombrello regge.',
+          this.time.now,
+        );
+        return;
+      }
+
       this.applyStain(PIGEON_STAIN, 'PICCIONE! Proprio sulla spalla.');
     });
 
@@ -204,7 +221,7 @@ export class GameScene extends Phaser.Scene {
 
   private buildTextOverlays(): void {
     this.add
-      .text(8, 8, '← →  muovi     SPAZIO  salta     R  ricomincia', {
+      .text(8, 8, '← →  muovi    SPAZIO  salta    SHIFT  ombrello    R  ricomincia', {
         fontFamily: 'monospace',
         fontSize: '9px',
         color: COLORS.textDim,
@@ -224,7 +241,7 @@ export class GameScene extends Phaser.Scene {
       .setDepth(100);
 
     this.debugText = this.add
-      .text(8, 22, '', { fontFamily: 'monospace', fontSize: '9px', color: COLORS.textDim })
+      .text(8, 34, '', { fontFamily: 'monospace', fontSize: '9px', color: COLORS.textDim })
       .setScrollFactor(0)
       .setVisible(false);
   }
@@ -249,7 +266,7 @@ export class GameScene extends Phaser.Scene {
     for (const pigeon of this.pigeons) pigeon.update(now);
     pruneDroppings(this.droppings);
     this.updateCheckpoint();
-    this.hud.update(this.presentability, this.appointment, now);
+    this.hud.update(this.presentability, this.appointment, this.player.umbrella, now);
 
     // Caduta nel varco: si finisce nel tombino, e non è pulito.
     // L'orologio continua a scorrere: perdere tempo è parte del prezzo.
@@ -303,6 +320,15 @@ export class GameScene extends Phaser.Scene {
         if (hazard.consumed) return;
         consumeTrash(hazard, this);
         this.applyStain(TRASH_COST, 'Spazzatura sui pantaloni.');
+        break;
+
+      case 'ombrellaio':
+        // Un negozio serve una volta sola: altrimenti basterebbe fare avanti
+        // e indietro davanti alla vetrina per essere sempre coperti.
+        if (hazard.consumed || hazard.wasTouching) return;
+        takeUmbrella(hazard);
+        this.player.umbrella.refill();
+        this.hud.flash('Ombrello nuovo. Tienilo da conto.', this.time.now);
         break;
 
       case 'fontanella': {

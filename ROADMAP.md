@@ -45,7 +45,10 @@ Il cuore del gioco: la barra che è insieme vita e punteggio.
 - [x] Checkpoint, uno per tratto di marciapiede
 - [x] Abiti di ricambio con tetto decrescente: cambiarsi non è più un premio
 - [x] Inviluppo di salto misurato, e piattaforme alte rese raggiungibili
-- [ ] Altri due o tre nemici dal bestiario
+- [x] **L'ombrello**: para dall'alto, rallenta, si rompe dopo tre colpi
+- [x] Negozi di ombrelli lungo la strada, uno a testa
+- [ ] Altri due o tre nemici dal bestiario — l'ombrello ha bisogno di più
+      minacce dall'alto per esprimersi davvero
 
 ## Fase 3 — Mondo vero
 

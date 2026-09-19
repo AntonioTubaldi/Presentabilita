@@ -28,6 +28,9 @@ export const COLORS = {
   pigeon: 0x9aa0b5,
   dropping: 0xe8e4d0,
   fountain: 0x49b0c9,
+  umbrella: 0x9b6bb5,
+  umbrellaShaft: 0x6b5a4a,
+  shop: 0xb58a3c,
 
   // Interfaccia
   barGood: 0x6fcf97,

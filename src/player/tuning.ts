@@ -42,6 +42,25 @@ export const TUNING = {
   /** Velocità di caduta massima (px/s): evita che si diventi ingestibili nei pozzi lunghi. */
   maxFallSpeed: 520,
 
+  // --- Ombrello aperto ---
+
+  /**
+   * Quanto rallenta camminare con l'ombrello aperto.
+   *
+   * È il cuore del suo equilibrio: l'ombrello non è un pulsante "sono al
+   * sicuro", è uno scambio fra sicurezza e tempo. E il tempo, con lei che
+   * aspetta, è la valuta più cara del gioco.
+   */
+  umbrellaSpeedFactor: 0.6,
+
+  /**
+   * Quanto si salta più in basso con l'ombrello aperto. Con 0,85 sulla
+   * spinta l'altezza scende a ~43 px, sotto i 50 che servono per i
+   * cornicioni: la via alta si prende **solo a ombrello chiuso**, e quindi
+   * esposti ai piccioni. È una conseguenza voluta, non un effetto collaterale.
+   */
+  umbrellaJumpFactor: 0.85,
+
   // --- Assist (invisibili al giocatore, ma li sente tutti) ---
 
   /**

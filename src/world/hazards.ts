@@ -13,7 +13,7 @@ import { COLORS } from '../config';
  * un'insidia non deve continuare a sporcare: sarebbe una punizione che il
  * giocatore non collega a nessuna sua decisione.
  */
-export type HazardKind = 'pozzanghera' | 'spazzatura' | 'fontanella';
+export type HazardKind = 'pozzanghera' | 'spazzatura' | 'fontanella' | 'ombrellaio';
 
 /** [tipo, centro x, centro y, larghezza, altezza] */
 export type HazardSpec = readonly [HazardKind, number, number, number, number];
@@ -37,6 +37,7 @@ const FILL: Record<HazardKind, number> = {
   pozzanghera: COLORS.puddle,
   spazzatura: COLORS.trash,
   fontanella: COLORS.fountain,
+  ombrellaio: COLORS.shop,
 };
 
 /** Ogni quanto la fontanella può erogare di nuovo a chi ci resta sotto (ms). */
@@ -73,6 +74,8 @@ export function createHazards(scene: Phaser.Scene, specs: readonly HazardSpec[])
     const view = scene.add.rectangle(x, y, width, height, FILL[kind]);
     if (kind === 'fontanella') {
       view.setStrokeStyle(1, COLORS.barGood);
+    } else if (kind === 'ombrellaio') {
+      view.setStrokeStyle(1, COLORS.umbrella);
     }
     scene.physics.add.existing(view, true);
     return {
@@ -120,6 +123,19 @@ export function consumeTrash(hazard: Hazard, scene: Phaser.Scene): void {
     duration: 180,
     onComplete: () => hazard.view.destroy(),
   });
+}
+
+/**
+ * Il negozio di ombrelli: ne prendi uno al volo e prosegui.
+ *
+ * Non costa tempo — la spesa è già stata fatta a monte, rompendo il
+ * precedente — ma ogni negozio serve una volta sola, altrimenti basterebbe
+ * fare avanti e indietro davanti alla vetrina.
+ */
+export function takeUmbrella(hazard: Hazard): void {
+  hazard.consumed = true;
+  hazard.view.setFillStyle(COLORS.trash);
+  hazard.view.setStrokeStyle(1, COLORS.barFrame);
 }
 
 /** La fontanella esaurita si spegne a vista, così il giocatore non ci torna sperando. */

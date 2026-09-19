@@ -7,6 +7,7 @@ import {
   STARTING_OUTFITS,
   type Presentability,
 } from '../game/presentability';
+import { UMBRELLA_MAX_HITS, type Umbrella } from '../player/umbrella';
 import { mixColor } from '../utils/color';
 
 const BAR = { width: 150, height: 8, right: 16, top: 16 } as const;
@@ -31,6 +32,7 @@ export class Hud {
   private readonly outfitIcons: Phaser.GameObjects.Rectangle[] = [];
   private readonly outfitShirts: Phaser.GameObjects.Rectangle[] = [];
   private readonly clock: Phaser.GameObjects.Text;
+  private readonly umbrellaLabel: Phaser.GameObjects.Text;
   private readonly message: Phaser.GameObjects.Text;
   private messageUntil = 0;
 
@@ -75,6 +77,12 @@ export class Hud {
       .setOrigin(1, 0)
       .setScrollFactor(0);
 
+    // A sinistra, sotto i comandi: lo stato dell'ombrello va letto di sfuggita
+    // mentre si corre, quindi sta lontano dalla barra e non si muove mai.
+    this.umbrellaLabel = scene.add
+      .text(8, 22, '', { fontFamily: 'monospace', fontSize: '9px', color: COLORS.textDim })
+      .setScrollFactor(0);
+
     this.clock = scene.add
       .text(GAME_WIDTH / 2, 14, '', {
         fontFamily: 'monospace',
@@ -108,8 +116,33 @@ export class Hud {
     this.clock.setColor(left <= 10 ? COLORS.textWarn : COLORS.text);
   }
 
-  update(presentability: Presentability, appointment: Appointment, time: number): void {
+  /**
+   * Quanti colpi regge ancora, e se in questo momento è aperto. Aperto si
+   * evidenzia in giallo perché in quello stato stai spendendo tempo: è
+   * un'informazione che serve *adesso*, non a fine livello.
+   */
+  private updateUmbrella(umbrella: Umbrella): void {
+    if (!umbrella.has) {
+      this.umbrellaLabel.setText('OMBRELLO  rotto');
+      this.umbrellaLabel.setColor(COLORS.textLate);
+      return;
+    }
+
+    const pieni = '#'.repeat(umbrella.hitsLeft);
+    const vuoti = '-'.repeat(UMBRELLA_MAX_HITS - umbrella.hitsLeft);
+    const stato = umbrella.isOpen ? 'APERTO' : 'chiuso';
+    this.umbrellaLabel.setText(`OMBRELLO  ${pieni}${vuoti}  ${stato}`);
+    this.umbrellaLabel.setColor(umbrella.isOpen ? COLORS.textWarn : COLORS.textDim);
+  }
+
+  update(
+    presentability: Presentability,
+    appointment: Appointment,
+    umbrella: Umbrella,
+    time: number,
+  ): void {
     this.updateClock(appointment);
+    this.updateUmbrella(umbrella);
 
     const ratio = presentability.percent / MAX_PRESENTABILITY;
     const ceilingRatio = presentability.ceiling / MAX_PRESENTABILITY;

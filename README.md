@@ -37,6 +37,7 @@ Poi apri http://localhost:5173.
 | --- | --- |
 | `←` `→` oppure `A` `D` | Muoviti |
 | `Spazio`, `W` o `↑` | Salta (tieni premuto per saltare più in alto) |
+| `Shift` o `X` (tieni premuto) | Apri l'ombrello: para dall'alto, ma rallenta |
 | `R` | Ricomincia il livello da capo |
 | `Tab` | Mostra/nascondi i valori di debug |
 
@@ -51,13 +52,14 @@ src/
   config.ts                  dimensioni, larghezza del mondo e palette
   player/tuning.ts           TUTTI i numeri che decidono il "feel" del movimento
   player/PlayerController.ts logica di corsa e salto
+  player/umbrella.ts         l'ombrello: para dall'alto, rallenta, si rompe
   game/presentability.ts     la barra che è insieme vita e punteggio
   game/appointment.ts        l'orologio: lei sta aspettando
   game/verdict.ts            il giudizio finale, che incrocia pulizia e puntualità
-  world/hazards.ts           pozzanghere, spazzatura, fontanelle
+  world/hazards.ts           pozzanghere, spazzatura, fontanelle, negozi di ombrelli
   world/skyline.ts           i palazzi in parallasse sullo sfondo
   enemies/Pigeon.ts          piccioni e relativi bombardamenti
-  ui/Hud.ts                  barra, orologio, abiti di ricambio, messaggi
+  ui/Hud.ts                  barra, orologio, ombrello, abiti di ricambio, messaggi
   scenes/GameScene.ts        il percorso e le regole che lo governano
 ```
 
@@ -85,6 +87,9 @@ Valori **misurati sul gioco in esecuzione**, non calcolati sulla carta:
 | Corsa diretta dall'inizio alla fine | 16,0 s, tirando dritto su tutto si arriva al 18% |
 | Limite prima del ritardo | 28 s |
 | Tetto degli abiti di ricambio | 100% → 55% → 30% |
+| Velocità con l'ombrello aperto | 102 px/s invece di 170 |
+| Salto con l'ombrello aperto | 42 px invece di 59 |
+| Colpi che regge un ombrello | 3 |
 
 Cambiarsi d'abito non riempie la barra: ne abbassa il tetto. Senza questo il
 gioco premiava chi si rovinava apposta prima del traguardo.

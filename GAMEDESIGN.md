@@ -103,8 +103,45 @@ d'abito: perdere tempo è parte del prezzo di ogni errore.
 Il limite del livello è il numero più delicato del gioco: troppo largo e
 l'orologio non conta, troppo stretto e diventa una punizione. Si tara su una
 misura, non a occhio — una corsa diretta che tira dritto su tutto e salta
-solo i varchi impiega **16,4 secondi**, e il limite è fissato a **28**, cioè
+solo i varchi impiega **16 secondi**, e il limite è fissato a **28**, cioè
 circa il 70% di margine. Va rimisurato ogni volta che il percorso si allunga.
+
+## L'ombrello: il verbo caratterizzante
+
+Correre e saltare ce l'hanno tutti. Questo è il gesto che rende il gioco
+riconoscibile, ed è **difensivo**, perché il gioco parla di proteggere
+qualcosa, non di attaccare. Un ragazzo che va a un appuntamento con
+l'ombrello non ha bisogno di spiegazioni.
+
+Si tiene premuto `SHIFT` (o `X`). Finché è aperto:
+
+| | |
+| --- | --- |
+| Para tutto ciò che viene **dall'alto** | piccioni, e in futuro tovaglie, gerani, imbianchini |
+| Non para **niente da terra** | pozzanghere, spazzatura, schizzi dei taxi |
+| Rallenta | 170 → 102 px/s |
+| Abbassa il salto | 59 → 42 px |
+
+Le quattro righe insieme fanno il lavoro, e nessuna funziona senza le altre:
+
+1. **Divide il bestiario in due metà.** Nessuna delle due si risolve da sola,
+   quindi tenerlo sempre aperto è una strategia perdente quanto non aprirlo mai.
+2. **Il costo è tempo**, cioè si innesta sulla tensione che già regge il
+   gioco. Non è "premi per essere al sicuro", è "spendi secondi per esserlo".
+3. **A 42 px non si sale sui cornicioni** (ne servono 50). Quindi la via alta
+   si prende solo a ombrello chiuso, cioè esposti. Questa non è una
+   limitazione accidentale: è il motivo per cui la via alta resta rischiosa.
+
+### Si rompe, e si ricompra
+
+Regge **tre colpi**, poi cede. Non è uno stato che attivi, è una risorsa che
+spendi: aprire l'ombrello significa anche consumarlo.
+
+Lungo la strada ci sono **negozi di ombrelli**: passandoci davanti ne prendi
+uno nuovo al volo, senza fermarti. Ogni negozio serve una volta sola —
+altrimenti basterebbe fare avanti e indietro davanti alla vetrina. Sono
+piazzati appena prima delle zone dei piccioni, così la domanda "lo tengo per
+dopo o lo apro adesso?" arriva sempre un attimo prima che serva.
 
 ## Altre idee da valutare
 
@@ -130,7 +167,7 @@ Implementato:
 
 - **Piccioni.** Pattugliano il cielo e bombardano. Il proiettile cade a
   velocità costante, non accelerata: è prevedibile, quindi essere colpiti è
-  sempre colpa tua.
+  sempre colpa tua. Parabili con l'ombrello.
 
 Da fare, in ordine di quanto mi convincono:
 
@@ -179,14 +216,10 @@ dei piccioni cadono a velocità costante.
 
 ## Ancora da decidere
 
-1. **Il verbo caratterizzante.** Correre e saltare ce l'hanno tutti. Serve una
-   cosa in più: una scivolata per passare sotto le cose? Un ombrello che para
-   dall'alto ma rallenta? Uno scatto che però ti spettina? Meglio una
-   meccanica sola sfruttata a fondo che tre appena accennate.
-2. **Estetica.** Pixel art originale o asset gratuiti (per esempio
+1. **Estetica.** Pixel art originale o asset gratuiti (per esempio
    [Kenney](https://kenney.nl/), dominio pubblico) per arrivare prima a un
    gioco completo, sostituendoli dopo.
-3. **Il personaggio.** Ha un nome? Si vede la ragazza durante il percorso
+2. **Il personaggio.** Ha un nome? Si vede la ragazza durante il percorso
    (messaggi sul telefono che aumentano la pressione) o solo alla fine?
 
 ---

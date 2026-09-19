@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS } from '../config';
 import { mixColor } from '../utils/color';
 import { BASE_GRAVITY, JUMP_VELOCITY, TUNING } from './tuning';
+import { Umbrella } from './umbrella';
 
 const KeyCodes = Phaser.Input.Keyboard.KeyCodes;
 
@@ -33,10 +34,15 @@ export interface PlayerDebugState {
 export class Player {
   readonly view: Phaser.GameObjects.Rectangle;
   readonly body: Phaser.Physics.Arcade.Body;
+  readonly umbrella = new Umbrella();
+
+  private readonly canopy: Phaser.GameObjects.Rectangle;
+  private readonly shaft: Phaser.GameObjects.Rectangle;
 
   private readonly leftKeys: Phaser.Input.Keyboard.Key[];
   private readonly rightKeys: Phaser.Input.Keyboard.Key[];
   private readonly jumpKeys: Phaser.Input.Keyboard.Key[];
+  private readonly umbrellaKeys: Phaser.Input.Keyboard.Key[];
 
   /** Secondi residui in cui il salto è ancora concesso dopo aver lasciato il suolo. */
   private coyoteTimer = 0;
@@ -64,6 +70,12 @@ export class Player {
       keyboard.addKey(KeyCodes.UP),
       keyboard.addKey(KeyCodes.W),
     ];
+    this.umbrellaKeys = [keyboard.addKey(KeyCodes.SHIFT), keyboard.addKey(KeyCodes.X)];
+
+    // La calotta va disegnata dove effettivamente ripara: sopra la testa.
+    // È l'unico modo che ha il giocatore di sapere a colpo d'occhio se è coperto.
+    this.shaft = scene.add.rectangle(x, y - 12, 2, 12, COLORS.umbrellaShaft).setVisible(false);
+    this.canopy = scene.add.rectangle(x, y - 18, 26, 5, COLORS.umbrella).setVisible(false);
   }
 
   /** @param delta millisecondi trascorsi dal frame precedente (quello che passa Phaser). */
@@ -75,7 +87,10 @@ export class Player {
     const jumpHeld = this.anyDown(this.jumpKeys);
     const jumpPressed = this.anyJustPressed(this.jumpKeys);
 
-    this.updateHorizontal(dt, onGround);
+    this.umbrella.setWantsOpen(this.anyDown(this.umbrellaKeys));
+    const sheltered = this.umbrella.isOpen;
+
+    this.updateHorizontal(dt, onGround, sheltered);
 
     // --- Timer di assist ---
     // Il coyote time si ricarica a terra e scorre in aria; il buffer parte
@@ -90,7 +105,7 @@ export class Player {
 
     // --- Stacco ---
     if (this.bufferTimer > 0 && this.coyoteTimer > 0) {
-      body.velocity.y = -JUMP_VELOCITY;
+      body.velocity.y = -JUMP_VELOCITY * (sheltered ? TUNING.umbrellaJumpFactor : 1);
       this.bufferTimer = 0;
       this.coyoteTimer = 0;
       this.rising = true;
@@ -105,11 +120,27 @@ export class Player {
     if (body.velocity.y > TUNING.maxFallSpeed) {
       body.velocity.y = TUNING.maxFallSpeed;
     }
+
+    this.drawUmbrella(sheltered);
   }
 
-  private updateHorizontal(dt: number, onGround: boolean): void {
+  private drawUmbrella(open: boolean): void {
+    this.canopy.setVisible(open);
+    this.shaft.setVisible(open);
+    if (!open) return;
+
+    // Si usa il corpo fisico, non il rettangolo: durante update() la posizione
+    // del game object è ancora quella del frame precedente (Phaser la ricopia
+    // dal corpo solo in postUpdate), e in corsa l'ombrello si sgancerebbe.
+    const { x, y } = this.body.center;
+    this.canopy.setPosition(x, y - 18);
+    this.shaft.setPosition(x, y - 12);
+  }
+
+  private updateHorizontal(dt: number, onGround: boolean, sheltered: boolean): void {
     const direction = (this.anyDown(this.rightKeys) ? 1 : 0) - (this.anyDown(this.leftKeys) ? 1 : 0);
-    const target = direction * TUNING.maxSpeed;
+    const maxSpeed = TUNING.maxSpeed * (sheltered ? TUNING.umbrellaSpeedFactor : 1);
+    const target = direction * maxSpeed;
 
     // Accelerare e frenare sono due sensazioni diverse: usano rate diversi,
     // e in aria entrambi sono più deboli che a terra.
