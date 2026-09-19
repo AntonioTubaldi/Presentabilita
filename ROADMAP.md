@@ -47,8 +47,9 @@ Il cuore del gioco: la barra che è insieme vita e punteggio.
 - [x] Inviluppo di salto misurato, e piattaforme alte rese raggiungibili
 - [x] **L'ombrello**: para dall'alto, rallenta, si rompe dopo tre colpi
 - [x] Negozi di ombrelli lungo la strada, uno a testa
-- [ ] Altri due o tre nemici dal bestiario — l'ombrello ha bisogno di più
-      minacce dall'alto per esprimersi davvero
+- [x] Il tizio che scuote la tovaglia dal balcone: raffica telegrafata
+- [x] La vecchietta che innaffia i gerani: getto lungo, si attraversa o si aspetta
+- [ ] Il taxi che passa sulla pozzanghera, e altri nemici da terra
 
 ## Fase 3 — Mondo vero
 

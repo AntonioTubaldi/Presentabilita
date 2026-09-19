@@ -117,7 +117,7 @@ Si tiene premuto `SHIFT` (o `X`). Finché è aperto:
 
 | | |
 | --- | --- |
-| Para tutto ciò che viene **dall'alto** | piccioni, e in futuro tovaglie, gerani, imbianchini |
+| Para tutto ciò che viene **dall'alto** | piccioni, tovaglie, gerani |
 | Non para **niente da terra** | pozzanghere, spazzatura, schizzi dei taxi |
 | Rallenta | 170 → 102 px/s |
 | Abbassa il salto | 59 → 42 px |
@@ -167,17 +167,32 @@ Implementato:
 
 - **Piccioni.** Pattugliano il cielo e bombardano. Il proiettile cade a
   velocità costante, non accelerata: è prevedibile, quindi essere colpiti è
-  sempre colpa tua. Parabili con l'ombrello.
+  sempre colpa tua. Parabile con l'ombrello, e consuma una carica.
+- **Il tizio che scuote la tovaglia dal balcone.** Raffica breve e
+  telegrafata: 12 punti, una volta per raffica. Si evita col tempismo.
+- **La vecchietta che innaffia i gerani.** Getto lungo: 7 punti ogni 0,4 s
+  finché ci resti sotto. Si attraversa di corsa (7 punti), si aspetta
+  (costa secondi), o ci si passa sotto l'ombrello.
+
+I due balconi hanno ritmi opposti di proposito, e insieme insegnano le due
+letture diverse che il gioco chiede: *quando* passare e *quanto in fretta*.
+Entrambi mostrano la colonna pericolosa in trasparenza **prima** di fare
+male, così essere colpiti è sempre una lettura sbagliata e mai una sorpresa.
+
+### Cosa rompe un ombrello, e cosa no
+
+Le briciole consumano una carica, l'acqua no: quello che rovina un ombrello
+è la roba che pesa. Non è solo colore — senza questa distinzione un getto
+lungo lo distruggerebbe in poco più di un secondo, e "l'ombrello para
+dall'alto" sarebbe una presa in giro. Così invece i due balconi chiedono
+due risposte diverse: contro la tovaglia l'ombrello è una **risorsa** che
+spendi, contro i gerani è un **pedaggio in secondi**.
 
 Da fare, in ordine di quanto mi convincono:
 
-- **Il tizio che scuote la tovaglia dal balcone** — telegrafato, ritmico,
-  facile da leggere e divertente da schivare.
 - **Il taxi che passa sulla pozzanghera** — si sente arrivare il motore, hai
   un secondo per allontanarti dal bordo. Il classico.
 - **Il cane che si scrolla l'acqua di dosso** — innocuo finché non ti avvicini.
-- **La vecchietta che innaffia i gerani** — getto continuo, ti costringe a
-  passare di corsa o ad aspettare (e l'orologio scorre).
 - **Il tombino che sbuffa vapore** — non ti sporca, ti arruffa i capelli:
   una categoria di danno diversa.
 - **I bambini con le pistole ad acqua** — ti inseguono, non stanno fermi.

@@ -32,6 +32,14 @@ export const COLORS = {
   umbrellaShaft: 0x6b5a4a,
   shop: 0xb58a3c,
 
+  // Balconi: il vicinato non ce l'ha con te, ma fa danni lo stesso
+  balcony: 0x4a4358,
+  neighbour: 0x8b7f9e,
+  tablecloth: 0xd8cfb4,
+  crumbs: 0xbfae82,
+  wateringCan: 0x7f9b6a,
+  water: 0x5fa8d3,
+
   // Interfaccia
   barGood: 0x6fcf97,
   barBad: 0xc9743a,

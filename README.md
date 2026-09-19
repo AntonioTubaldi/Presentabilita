@@ -59,6 +59,7 @@ src/
   world/hazards.ts           pozzanghere, spazzatura, fontanelle, negozi di ombrelli
   world/skyline.ts           i palazzi in parallasse sullo sfondo
   enemies/Pigeon.ts          piccioni e relativi bombardamenti
+  enemies/Balcony.ts         tovaglie scosse e gerani innaffiati, dall'alto
   ui/Hud.ts                  barra, orologio, ombrello, abiti di ricambio, messaggi
   scenes/GameScene.ts        il percorso e le regole che lo governano
 ```
@@ -89,7 +90,11 @@ Valori **misurati sul gioco in esecuzione**, non calcolati sulla carta:
 | Tetto degli abiti di ricambio | 100% → 55% → 30% |
 | Velocità con l'ombrello aperto | 102 px/s invece di 170 |
 | Salto con l'ombrello aperto | 42 px invece di 59 |
-| Colpi che regge un ombrello | 3 |
+| Colpi che regge un ombrello | 3 (le briciole lo consumano, l'acqua no) |
+| Tovaglia dal balcone | 12 punti, una volta per raffica |
+| Getto dei gerani | 7 punti ogni 0,4 s finché ci resti sotto |
+| Corsa senza mai aprire l'ombrello | 14,7 s, si arriva all'8% |
+| Stessa corsa aprendolo sotto i balconi | 16,3 s, si arriva al 14% col completo buono |
 
 Cambiarsi d'abito non riempie la barra: ne abbassa il tetto. Senza questo il
 gioco premiava chi si rovinava apposta prima del traguardo.

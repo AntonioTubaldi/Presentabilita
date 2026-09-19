@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, WORLD_WIDTH } from '../config';
+import { Balcony, type BalconySpec } from '../enemies/Balcony';
 import { Pigeon, PIGEON_STAIN, pruneDroppings, type PigeonSpec } from '../enemies/Pigeon';
 import { Appointment } from '../game/appointment';
 import { Presentability } from '../game/presentability';
@@ -88,6 +89,26 @@ const PIGEONS: readonly PigeonSpec[] = [
 ];
 
 /**
+ * I balconi, piazzati nei corridoi verticali liberi da cornicioni: la zona
+ * pericolosa scende fino alla strada, quindi sopra non deve esserci nulla
+ * che la interrompa.
+ *
+ * Gli sfasamenti sono distribuiti lungo il ciclo di ciascun tipo (2,5 s per
+ * la tovaglia, 4,1 s per i gerani) così due balconi dello stesso tipo non si
+ * trovano mai nello stesso punto del ciclo: il ritmo imparato sul primo non
+ * si riusa meccanicamente sul secondo. Sono troppo distanti per vedersi a
+ * schermo insieme, quindi è questo — e solo questo — che gli sfasamenti
+ * comprano.
+ */
+const BALCONIES: readonly BalconySpec[] = [
+  { kind: 'gerani', x: 330, y: 205, offsetMs: 0 }, // primo assaggio, in zona tranquilla
+  { kind: 'tovaglia', x: 760, y: 205, offsetMs: 0 }, // insieme ai piccioni: qui serve l'ombrello
+  { kind: 'gerani', x: 1350, y: 205, offsetMs: 1350 },
+  { kind: 'tovaglia', x: 1740, y: 205, offsetMs: 1250 },
+  { kind: 'gerani', x: 2250, y: 205, offsetMs: 2700 },
+];
+
+/**
  * Punti di ripartenza, uno per tratto di marciapiede. Senza, cadere in un
  * tombino a tre quarti del percorso rimanderebbe all'inizio — con l'orologio
  * che scorre sarebbe la fine della partita, non un intoppo.
@@ -126,6 +147,7 @@ export class GameScene extends Phaser.Scene {
   private presentability!: Presentability;
   private appointment!: Appointment;
   private pigeons: Pigeon[] = [];
+  private balconies: Balcony[] = [];
   private droppings!: Phaser.GameObjects.Group;
   private hazards: Hazard[] = [];
   private hazardsByView = new Map<Phaser.GameObjects.GameObject, Hazard>();
@@ -146,6 +168,7 @@ export class GameScene extends Phaser.Scene {
     this.appointment = new Appointment(LEVEL_TIME_MS);
     this.hazardsByView = new Map();
     this.pigeons = [];
+    this.balconies = [];
 
     this.cameras.main.setBackgroundColor(COLORS.background);
     createSkyline(this);
@@ -169,6 +192,7 @@ export class GameScene extends Phaser.Scene {
 
     this.droppings = this.add.group();
     for (const spec of PIGEONS) this.pigeons.push(new Pigeon(this, this.droppings, spec));
+    for (const spec of BALCONIES) this.balconies.push(new Balcony(this, spec));
 
     const start = CHECKPOINTS[0]!;
     this.player = new Player(this, start.x, start.y);
@@ -264,6 +288,7 @@ export class GameScene extends Phaser.Scene {
     this.appointment.tick(delta);
     this.player.update(delta);
     for (const pigeon of this.pigeons) pigeon.update(now);
+    this.updateBalconies(now);
     pruneDroppings(this.droppings);
     this.updateCheckpoint();
     this.hud.update(this.presentability, this.appointment, this.player.umbrella, now);
@@ -284,6 +309,43 @@ export class GameScene extends Phaser.Scene {
       this.debugText.setText(
         `x ${this.player.view.x.toFixed(0)}  vel ${state.velocityX.toFixed(0)}  ` +
           `t ${this.appointment.elapsedSeconds.toFixed(1)}s  fps ${this.game.loop.actualFps.toFixed(0)}`,
+      );
+    }
+  }
+
+  /**
+   * I balconi colpiscono chi si trova nella loro colonna mentre sono attivi.
+   * Il controllo è sulle sole x: la zona scende dal balcone fino alla strada,
+   * quindi non esiste un'altezza in cui si sia al riparo — se non sotto
+   * l'ombrello.
+   */
+  private updateBalconies(now: number): void {
+    const body = this.player.body;
+    const left = body.x;
+    const right = body.x + body.width;
+
+    for (const balcony of this.balconies) {
+      balcony.update(now);
+      if (!balcony.coversX(left, right)) continue;
+      if (!balcony.tryHit(now)) continue;
+
+      if (!this.player.umbrella.isOpen) {
+        this.applyStain(balcony.damage, balcony.message);
+        continue;
+      }
+
+      // Parato. Le briciole consumano l'ombrello, l'acqua no: vedi Balcony.ts.
+      if (!balcony.breaksUmbrella) {
+        this.hud.flash('L’acqua scivola sull’ombrello.', now);
+        continue;
+      }
+
+      const esito = this.player.umbrella.absorb();
+      this.hud.flash(
+        esito === 'rotto'
+          ? "L'ombrello ha ceduto. Ti serve un ombrellaio."
+          : 'TOC. L’ombrello regge.',
+        now,
       );
     }
   }
